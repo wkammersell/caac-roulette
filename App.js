@@ -63,7 +63,7 @@ Ext.define('CustomApp', {
 			callback: function( records, operation ) {
 				if( operation.wasSuccessful() ) {
 					this._myMask.hide();
-					this.displayUser( records );
+					this.displayUser( records, null );
 				} else {
 					this._myMask.hide();
 					this.clearContent();
@@ -74,9 +74,12 @@ Ext.define('CustomApp', {
 		});
     },
     
-    displayUser:function( records ) {
-    	var randomIndex = Math.floor( Math.random() * records.length );
-		var user = ( records[ randomIndex ].data );
+    displayUser:function( records, priorUser ) {
+    	this.clearContent();
+    	var user;
+    	do {
+			user = ( records[ Math.floor( Math.random() * records.length ) ].data );
+		} while ( priorUser !== null && user.ObjectID === priorUser.ObjectID );
     	
     	var fullBox = this.add( {
 			xype: 'container',
@@ -87,7 +90,7 @@ Ext.define('CustomApp', {
 			}
 		});
 		
-		var detailsBox = fullBox.add( {
+		var leftSide = fullBox.add( {
 			xype: 'container',
 			border: 0,
 			flex: 1,
@@ -97,48 +100,49 @@ Ext.define('CustomApp', {
 			}
 		});
 		
+		// Only mod by 1000000 to get darker colors, as our background is white
 		var color = '#' + ( user.ObjectID % 1000000 ).toString().padStart( 6, '0' );
-		var userName = user.FirstName + ' ' + user.MiddleName + ' ' + user.LastName;
+		var userName = _.compact( [ user.FirstName, user.MiddleName, user.LastName ] ).join( ' ' );
 		
-		this.addLabel( detailsBox, userName );
-		if( user.DisplayName && user.DisplayName != userName ) {
-			this.addLabel( detailsBox, 'aka: ' + user.DisplayName );
+		this.addLabel( leftSide, userName );
+		if( user.DisplayName && user.DisplayName !== userName ) {
+			this.addLabel( leftSide, 'aka: ' + user.DisplayName );
 		}
 		
 		if( user.Role ) {
-			this.addHeader( detailsBox, 'Role', color );
-			this.addLabel( detailsBox, user.Role );
+			this.addHeader( leftSide, 'Role', color );
+			this.addLabel( leftSide, user.Role );
 		}
 		
 		if( user.OfficeLocation ) {
-			this.addHeader( detailsBox, 'Office Location', color );
-			this.addLabel( detailsBox, user.OfficeLocation );
+			this.addHeader( leftSide, 'Office Location', color );
+			this.addLabel( leftSide, user.OfficeLocation );
 		}
 		
 		if( user.EmailAddress ) {
-			this.addHeader( detailsBox, 'Email', color );
-			this.addLabel( detailsBox, user.EmailAddress );
+			this.addHeader( leftSide, 'Email', color );
+			this.addLabel( leftSide, user.EmailAddress );
 		}
 		
 		if( user.Phone ) {
-			this.addHeader( detailsBox, 'Phone', color );
-			this.addLabel( detailsBox, user.Phone );
+			this.addHeader( leftSide, 'Phone', color );
+			this.addLabel( leftSide, user.Phone );
 		}
 		
 		if( user.Language ) {
-			this.addHeader( detailsBox, 'Language', color );
-			this.addLabel( detailsBox, user.Language );
+			this.addHeader( leftSide, 'Language', color );
+			this.addLabel( leftSide, user.Language );
 		}
 		
 		if( user.DefaultProject && user.DefaultProject._refObjectName ) {
-			this.addHeader( detailsBox, 'Default Project', color );
-			this.addLabel( detailsBox, user.DefaultProject._refObjectName );
+			this.addHeader( leftSide, 'Default Project', color );
+			this.addLabel( leftSide, user.DefaultProject._refObjectName );
 		}
 		
-		this.addHeader( detailsBox, 'Last Active Date', color );
-		this.addLabel( detailsBox, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
+		this.addHeader( leftSide, 'Last Active Date', color );
+		this.addLabel( leftSide, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
 		
-		var imageBox = fullBox.add( {
+		var rightSide = fullBox.add( {
 			xype: 'container',
 			border: 0,
 			flex: 1,
@@ -146,15 +150,16 @@ Ext.define('CustomApp', {
 				type: 'vbox'			}
 		});
 		
-		imageBox.add( {
+		this.addButton( rightSide, '\u00BB' + ' Next User', color, function(){ this.displayUser( records, user.ObjectID ); } );
+		
+		rightSide.add( {
 			xtype: 'image',
-			//TODO: Make this work in other environments
+			//TODO: Make this work in other environments, like eu1
 			src: 'http://rally1.rallydev.com/slm/profile/image/' + user.ObjectID + '/100.sp',
 			height: '100px',
 			width: '100px'
 		} );
     	
-    	//TODO: Add respin option
     	//TODO: Add last work items
     },
     
@@ -177,6 +182,23 @@ Ext.define('CustomApp', {
 			style: {
 				'font-size': '15px'
 			}
+		} );
+	},
+	
+	addButton:function( parent, text, color, handler ) {
+		var button = parent.add( {
+			xtype: 'rallybutton',
+			text: text,
+			handler: handler,
+			scope: this,
+			style: {
+				'background-color': color,
+				'border-color': color
+			}
+		} );
+		button.getEl().down( '.x-btn-inner' ).setStyle( {
+			'color': '#FFFFFF',
+			'font-size': '15px'
 		} );
 	},
 	
