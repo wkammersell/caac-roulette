@@ -51,6 +51,7 @@ Ext.define('CustomApp', {
 					}
 				],
 				context: this.getContext().getDataContext(),
+				// Only load 200 for a good mix of randomness and performance
 				pageSize: 200,
 				limit: 200
 			},
@@ -97,28 +98,42 @@ Ext.define('CustomApp', {
 		});
 		
 		var color = '#' + ( user.ObjectID % 1000000 ).toString().padStart( 6, '0' );
+		var userName = user.FirstName + ' ' + user.MiddleName + ' ' + user.LastName;
 		
-		//TODO: Handle null values
-		this.addLabel( detailsBox, user.FirstName + ' ' + user.MiddleName + ' ' + user.LastName );
-		this.addLabel( detailsBox, 'aka: ' + user.DisplayName );
+		this.addLabel( detailsBox, userName );
+		if( user.DisplayName && user.DisplayName != userName ) {
+			this.addLabel( detailsBox, 'aka: ' + user.DisplayName );
+		}
 		
-		this.addHeader( detailsBox, 'Role', color );
-		this.addLabel( detailsBox, user.Role );
+		if( user.Role ) {
+			this.addHeader( detailsBox, 'Role', color );
+			this.addLabel( detailsBox, user.Role );
+		}
 		
-		this.addHeader( detailsBox, 'Office Location', color );
-		this.addLabel( detailsBox, user.OfficeLocation );
+		if( user.OfficeLocation ) {
+			this.addHeader( detailsBox, 'Office Location', color );
+			this.addLabel( detailsBox, user.OfficeLocation );
+		}
 		
-		this.addHeader( detailsBox, 'Email', color );
-		this.addLabel( detailsBox, user.EmailAddress );
+		if( user.EmailAddress ) {
+			this.addHeader( detailsBox, 'Email', color );
+			this.addLabel( detailsBox, user.EmailAddress );
+		}
 		
-		this.addHeader( detailsBox, 'Phone', color );
-		this.addLabel( detailsBox, user.Phone );
+		if( user.Phone ) {
+			this.addHeader( detailsBox, 'Phone', color );
+			this.addLabel( detailsBox, user.Phone );
+		}
 		
-		this.addHeader( detailsBox, 'Language', color );
-		this.addLabel( detailsBox, user.Language );
+		if( user.Language ) {
+			this.addHeader( detailsBox, 'Language', color );
+			this.addLabel( detailsBox, user.Language );
+		}
 		
-		this.addHeader( detailsBox, 'Default Project', color );
-		this.addLabel( detailsBox, user.DefaultProject._refObjectName );
+		if( user.DefaultProject && user.DefaultProject._refObjectName ) {
+			this.addHeader( detailsBox, 'Default Project', color );
+			this.addLabel( detailsBox, user.DefaultProject._refObjectName );
+		}
 		
 		this.addHeader( detailsBox, 'Last Active Date', color );
 		this.addLabel( detailsBox, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
