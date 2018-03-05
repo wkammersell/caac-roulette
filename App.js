@@ -121,12 +121,12 @@ Ext.define('CustomApp', {
 		
 		if( user.EmailAddress ) {
 			this.addHeader( leftSide, 'Email', color );
-			this.addLabel( leftSide, user.EmailAddress );
+			this.addLabel( leftSide, '<a href="mailto:' + user.EmailAddress + '">' + user.EmailAddress + '</a>' );
 		}
 		
 		if( user.Phone ) {
 			this.addHeader( leftSide, 'Phone', color );
-			this.addLabel( leftSide, user.Phone );
+			this.addLabel( leftSide, '<a href="tel:' + user.Phone + '">' + user.Phone + '</a>' );
 		}
 		
 		if( user.Language ) {
@@ -168,7 +168,7 @@ Ext.define('CustomApp', {
 			xtype: 'label',
 			html: '<u><b>' + text + '</b></u>',
 			style: {
-				'font-size': '12px',
+				'font-size': '13px',
 				'color': color ? color : '#333333'
 			},
 			padding: '5 0 1 0'
