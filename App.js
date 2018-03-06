@@ -109,12 +109,12 @@ Ext.define('CustomApp', {
 			this.addLabel( leftSide, 'aka: ' + user.DisplayName );
 		}
 		
-		if( user.Role ) {
+		if( user.Role && user.Role !== 'None' ) {
 			this.addHeader( leftSide, 'Role', color );
 			this.addLabel( leftSide, user.Role );
 		}
 		
-		if( user.OfficeLocation ) {
+		if( user.OfficeLocation && user.OfficeLocation !== 'None' ) {
 			this.addHeader( leftSide, 'Office Location', color );
 			this.addLabel( leftSide, user.OfficeLocation );
 		}
@@ -151,6 +151,7 @@ Ext.define('CustomApp', {
 		});
 		
 		this.addButton( rightSide, '\u00BB' + ' Next User', color, function(){ this.displayUser( records, user.ObjectID ); } );
+		this.addLabel( rightSide, '<br/>' );
 		
 		rightSide.add( {
 			xtype: 'image',
