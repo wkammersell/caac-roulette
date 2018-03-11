@@ -184,10 +184,12 @@ Ext.define('CustomApp', {
 						this.addHeader( leftSide, 'Default Project', color );
 						this.addLabel( leftSide, user.DefaultProject._refObjectName );
 					}
-		
-					this.addHeader( leftSide, 'Last Active Date', color );
-					this.addLabel( leftSide, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
-		
+					
+					if( user.LastActiveDate ) {
+						this.addHeader( leftSide, 'Last Active Date', color );
+						this.addLabel( leftSide, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
+					}
+					
 					var rightSide = detailsBox.add( {
 						xype: 'container',
 						border: 0,
