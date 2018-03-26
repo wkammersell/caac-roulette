@@ -93,34 +93,50 @@
     	this._myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Loading... Please wait."});
 		this._myMask.show();
 		
-		var filters = [];
-		filters.push( Ext.create('Rally.data.wsapi.Filter', {
-			property : 'Owner.ObjectID',
-			operator: '=',
-			value: user.ObjectID
-		} ) );
-		var store = Ext.create(
-			'Rally.data.wsapi.Store',
-			{
-				model: 'UserStory',
-				fetch: [
-					'FormattedID',
-					'Name'
-				],
-				sorters: [
-					{
-						property: 'LastUpdateDate',
-						direction: 'DESC'
-					}
-				],
-				context: this.getContext().getDataContext(),
-				pageSize: 3,
-				limit: 3
-			},
-			this
-		);
-		store.addFilter( filters, false );
-		store.loadPage( 1, {
+		// Only show items started in the last 90 days
+		var activeDate = new Date();
+		activeDate.setDate( activeDate.getDate() - 90 );
+		
+		var store = Ext.create( 'Rally.data.lookback.SnapshotStore', {
+			fetch: ['FormattedID',
+					'Name'],
+			context: this.getContext().getDataContext(),
+			includeTotalResultCount: false,
+			removeUnauthorizedSnapshots: true,
+			compress: true,
+			pageSize: 10,
+			limit: 10,
+			filters: [
+				{
+					property: '_TypeHierarchy',
+					operator: '=',
+					value: 'HierarchicalRequirement'
+				},
+				{
+					property: 'Owner',
+					operator: '=',
+					value: user.ObjectID
+				},
+				{
+					property: 'ScheduleState',
+					operator: '>',
+					value: 'Defined'
+				},
+				{
+					property: '_ValidFrom',
+					operator: '>=',
+					value: activeDate
+				}
+    		],
+    		sorters: [
+				{
+					property: '_ValidFrom',
+					direction: 'DESC'
+				}
+			]
+		});
+		
+		store.load( {
 			scope: this,
 			callback: function( workItemRecords, operation ) {
 				if( operation.wasSuccessful() ) {
@@ -229,19 +245,24 @@
 					
 					if( workItemRecords.length > 0 ) {
 						this.addHeader( workBox, 'Recent Stories', color );
+						var addedWorkItems = [];
 						_.each( workItemRecords, function( workItemRecord ) {
-							var workItemBox = workBox.add( {
-								xype: 'container',
-								border: 0,
-								flex: 1,
-								layout: {
-									type: 'hbox',
-									align: 'stretch'
-								},
-								padding: '5 0 0 0'
-							});
-							this.addButton( workItemBox, workItemRecord.data.FormattedID, color, function(){ Rally.nav.Manager.showDetail( workItemRecord.raw._ref ); } );
-							this.addLabel( workItemBox, workItemRecord.data.Name );
+							// Because compress doesn't seem to be working in the LBAPI call, let's make sure we aren't added duplicates
+							if( !addedWorkItems.includes( workItemRecord.data.FormattedID ) ) {
+								var workItemBox = workBox.add( {
+									xype: 'container',
+									border: 0,
+									flex: 1,
+									layout: {
+										type: 'hbox',
+										align: 'stretch'
+									},
+									padding: '5 0 0 0'
+								});
+								this.addButton( workItemBox, workItemRecord.data.FormattedID, color, function(){ Rally.nav.Manager.showDetail( workItemRecord.raw._ref ); } );
+								this.addLabel( workItemBox, workItemRecord.data.Name );
+								addedWorkItems.push( workItemRecord.data.FormattedID );
+							}
 						}, this );
 					}
 				} else {
