@@ -240,7 +240,15 @@
 								},
 								padding: '5 0 0 0'
 							});
-							this.addButton( workItemBox, workItemRecord.data.FormattedID, color, function(){ Rally.nav.Manager.showDetail( workItemRecord.raw._ref ); } );
+							
+							var workItemLink = Rally.nav.DetailLink.getLink( {
+								record: workItemRecord,
+								text: workItemRecord.data.FormattedID
+							} );
+							// Insert a blank target for EDP users so we don't navigate away from the app
+							workItemLink = workItemLink.slice( 0, 3 ) + 'target="_blank"' + workItemLink.slice( 3 );
+							this.addLabel( workItemBox, workItemLink );
+							this.addLabel( workItemBox, '&nbsp;&nbsp;&nbsp;&nbsp;' );
 							this.addLabel( workItemBox, workItemRecord.data.Name );
 						}, this );
 					}
@@ -303,8 +311,7 @@
 
             Rally.launchApp('CustomApp', {
                 name:"CAAC-Roulette",
-                parentRepos:"",
-                version:"0.1.1"
+	            parentRepos:""
             });
 
         });
