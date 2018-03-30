@@ -250,7 +250,9 @@ Ext.define('CustomApp', {
 									},
 									padding: '5 0 0 0'
 								});
-								this.addButton( workItemBox, workItemRecord.data.FormattedID, color, function(){ Rally.nav.Manager.showDetail( workItemRecord.raw._ref ); } );
+								this.addButton( workItemBox, workItemRecord.data.FormattedID, color, function(){
+									Rally.nav.Manager.showDetail( '/hierarchicalrequirement/' + workItemRecord.data.ObjectID  );
+								} );
 								this.addLabel( workItemBox, workItemRecord.data.Name );
 								addedWorkItems.push( workItemRecord.data.FormattedID );
 							}
