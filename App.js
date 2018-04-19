@@ -17,6 +17,11 @@ Ext.define('CustomApp', {
 			operator: '=',
 			value: 'false'
 		} ) );
+		filters.push( Ext.create('Rally.data.wsapi.Filter', {
+			property : 'Role',
+			operator: '!=',
+			value: 'None'
+	    
 		
 		// Only show users who have been active in the last 30 days
 		var activeDate = new Date();
@@ -41,6 +46,8 @@ Ext.define('CustomApp', {
 					'LastName',
 					'MiddleName',
 					'OfficeLocation',
+					'LastSystemTimeZoneName',
+					'CreationDate',
 					'Phone',
 					'Role'
 				],
@@ -89,8 +96,7 @@ Ext.define('CustomApp', {
 		activeDate.setDate( activeDate.getDate() - 90 );
 		
 		var store = Ext.create( 'Rally.data.lookback.SnapshotStore', {
-			fetch: ['FormattedID',
-					'Name'],
+			fetch: ['FormattedID','Name','LastUpdateDate','Owner'],
 			context: this.getContext().getDataContext(),
 			includeTotalResultCount: false,
 			removeUnauthorizedSnapshots: true,
@@ -166,45 +172,46 @@ Ext.define('CustomApp', {
 					var color = '#' + ( user.ObjectID % 1000000 ).toString().padStart( 6, '0' );
 					var userName = _.compact( [ user.FirstName, user.MiddleName, user.LastName ] ).join( ' ' );
 		
-					this.addLabel( leftSide, userName );
-					if( user.DisplayName && user.DisplayName !== userName ) {
-						this.addLabel( leftSide, 'aka: ' + user.DisplayName );
-					}
-		
-					if( user.Role && user.Role !== 'None' ) {
-						this.addHeader( leftSide, 'Role', color );
-						this.addLabel( leftSide, user.Role );
-					}
-		
-					if( user.OfficeLocation && user.OfficeLocation !== 'None' ) {
-						this.addHeader( leftSide, 'Office Location', color );
-						this.addLabel( leftSide, user.OfficeLocation );
-					}
-		
-					if( user.EmailAddress ) {
-						this.addHeader( leftSide, 'Email', color );
-						this.addLabel( leftSide, '<a href="mailto:' + user.EmailAddress + '">' + user.EmailAddress + '</a>' );
-					}
-		
-					if( user.Phone ) {
-						this.addHeader( leftSide, 'Phone', color );
-						this.addLabel( leftSide, '<a href="tel:' + user.Phone + '">' + user.Phone + '</a>' );
-					}
-		
-					if( user.Language ) {
-						this.addHeader( leftSide, 'Language', color );
-						this.addLabel( leftSide, user.Language );
-					}
-		
-					if( user.DefaultProject && user.DefaultProject._refObjectName ) {
-						this.addHeader( leftSide, 'Default Project', color );
-						this.addLabel( leftSide, user.DefaultProject._refObjectName );
-					}
-					
-					if( user.LastActiveDate ) {
-						this.addHeader( leftSide, 'Last Active Date', color );
-						this.addLabel( leftSide, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
-					}
+                    this.addLabel( leftSide, userName );
+                    if( user.DisplayName && user.DisplayName !== userName ) {
+                        this.addLabel( leftSide, 'aka: ' + user.DisplayName );
+                    }
+       
+                    if( user.Role && user.Role !== 'None' ) {
+                        this.addHeader( leftSide, 'Role', color );
+                        this.addLabel( leftSide, user.Role );
+                    }
+        
+                    if( user.CreationDate && user.CreationDate !== 'None' ) {
+                        this.addHeader( leftSide, 'Member Since', color );
+                        this.addLabel( leftSide, user.CreationDate.toLocaleString( 'en-US', { year: 'numeric', month: 'long' } ) );
+                    }
+        
+                    if( user.EmailAddress ) {
+                        this.addHeader( leftSide, 'Email', color );
+                        this.addLabel( leftSide, '<a href="mailto:' + user.EmailAddress + '">' + user.EmailAddress + '</a>' );
+                    }
+        
+                    if( user.Phone ) {
+                        this.addHeader( leftSide, 'Phone', color );
+                        this.addLabel( leftSide, '<a href="tel:' + user.Phone + '">' + user.Phone + '</a>' );
+                    }
+        
+                    if( user.LastSystemTimeZoneName ) {
+                        this.addHeader( leftSide, 'Time Zone', color );
+                        this.addLabel( leftSide, user.LastSystemTimeZoneName );
+                    }
+        
+                    if( user.DefaultProject && user.DefaultProject._refObjectName ) {
+                        this.addHeader( leftSide, 'Default Project', color );
+                        this.addLabel( leftSide, user.DefaultProject._refObjectName );
+                    }
+                    
+                    if( user.LastActiveDate ) {
+                        this.addHeader( leftSide, 'Last Active Date', color );
+                        this.addLabel( leftSide, user.LastActiveDate.toLocaleString( 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } ) );
+                    }
+                    
 					
 					var rightSide = detailsBox.add( {
 						xype: 'container',
@@ -219,9 +226,9 @@ Ext.define('CustomApp', {
 					rightSide.add( {
 						xtype: 'image',
 						//TODO: Make this work in other environments, like eu1
-						src: 'http://rally1.rallydev.com/slm/profile/image/' + user.ObjectID + '/100.sp',
-						height: '100px',
-						width: '100px'
+						src: 'https://rally1.rallydev.com/slm/profile/image/' + user.ObjectID + '/100.sp',
+						height: '150px',
+						width: '150px'
 					} );
 					
 					var workBox = fullBox.add( {
